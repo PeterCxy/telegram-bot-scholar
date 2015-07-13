@@ -1,0 +1,17 @@
+{
+	"name": "telegram-bot-scholar",
+	"version": "1.0.0",
+	"author": "PeterCxy",
+	"description": "Make your telegram bot by telegram-bot-coffee a Scholar!",
+	"license": "GPL-3.0.0",
+	"homepage": "https://github.com/PeterCxy/telegram-bot-scholar",
+	"dependencies": {
+		"telegram-bot-coffee": ">=1.0.0",
+		"request": ">=2.45.0",
+		"cheerio": ">=0.19.0"
+	},
+	"devDependencies": {
+		"coffee-script": ">=1.9.0"
+	},
+	"main": "./lib/functions"
+}
