@@ -8,7 +8,6 @@ exports.setup = (telegram, store) ->
 			cmd: 'google'
 			desc: 'Google for something'
 			num: 1
-			opt: 1
 			act: (msg, sth) ->
 				if sth?
 					google msg.text, (items) =>
