@@ -2,6 +2,7 @@ exports.name = "scholar"
 exports.desc = "A scholar bot!"
 
 exports.setup = (telegram, store) ->
+	mathjs = require 'mathjs'
 	{google} = require './google'
 
 	[
@@ -17,4 +18,18 @@ exports.setup = (telegram, store) ->
 							opt = ''
 							(opt += "#{item.link}\n#{item.title}\n#{item.desc}\n\n" if item.link?) for item in items
 							telegram.sendMessage msg.chat.id, opt
+		,
+			cmd: 'calc'
+			args: '<expression>'
+			num: -1
+			desc: 'Calculate <expression>. For details about expression format, see http://mathjs.org/docs/expressions/syntax.html'
+			act: (msg, args) ->
+				# First, reconstruct the expression
+				exp = ''
+				for arg in args
+					exp += arg + ' '
+				exp = exp.trim()
+				console.log exp
+				telegram.sendMessage msg.chat.id, mathjs.eval exp
+
 	]
