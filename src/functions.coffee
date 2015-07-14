@@ -26,10 +26,16 @@ exports.setup = (telegram, store) ->
 			act: (msg, args) ->
 				# First, reconstruct the expression
 				exp = ''
-				for arg in args
-					exp += arg + ' '
+				exp += arg + ' ' for arg in args
 				exp = exp.trim()
 				console.log exp
-				telegram.sendMessage msg.chat.id, mathjs.eval exp
+
+				# Parse all expressions
+				parser = mathjs.parser()
+				res = ''
+				for line in exp.split '\n'
+					t = parser.eval line
+					res += t + '\n' if t != ''
+				telegram.sendMessage msg.chat.id, res, msg.message_id if res != ''
 
 	]
