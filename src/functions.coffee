@@ -7,7 +7,7 @@ exports.setup = (telegram, store) ->
 
 	[
 			cmd: 'google'
-			desc: 'Google for something'
+			desc: 'Google for something, If the query contains spaces, wrap it with quotes (") '
 			num: 1
 			act: (msg, sth) ->
 				if sth?
