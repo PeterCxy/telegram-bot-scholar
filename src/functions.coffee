@@ -41,10 +41,17 @@ googleFor = (query, msg, start, telegram, store, server) ->
 			server.releaseInput msg.chat.id, msg.from.id
 		else
 			opt = ''
-			(opt += "#{item.link}\n#{item.title}\n#{item.desc}\n\n" if item.link?) for item in items
-			opt += "More results available. Send me 'Next' to see more." if next
+			# Groups start with '#' connect to IRC. Disable long output.
+			if msg.chat.title? and msg.chat.title.startsWith '#'
+				# TODO This should be configurable
+				opt += "#{items[0].link}\n#{items[0].title}\n#{items[0].desc}"
+				opt += '\n\nShowing only the first result in this group.'
+			else
+				(opt += "#{item.link}\n#{item.title}\n#{item.desc}\n\n" if item.link?) for item in items
+				opt += "More results available. Send me 'Next' to see more." if next
 			telegram.sendMessage msg.chat.id, opt
-			if next
+
+			if next and (!msg.chat.title? or !msg.chat.title.startsWith '#')
 				server.grabInput msg.chat.id, msg.from.id, pkg.name, 'google'
 				store.put 'google', "#{msg.chat.id}next#{msg.from.id}", next, (err) =>
 					if err?
