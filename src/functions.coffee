@@ -1,23 +1,16 @@
 exports.name = "scholar"
 exports.desc = "A scholar bot!"
 
-exports.setup = (telegram, store) ->
+exports.setup = (telegram, store, server) ->
 	mathjs = require 'mathjs'
-	{google} = require './google'
 
 	[
 			cmd: 'google'
 			desc: 'Google for something, If the query contains spaces, wrap it with quotes (") '
 			num: 1
 			act: (msg, sth) ->
-				if sth?
-					google msg.text, (items) =>
-						if !items? or items.lenth == 0
-							telegram.sendMessage msg.chat.id, 'Oops, I don\'t know'
-						else
-							opt = ''
-							(opt += "#{item.link}\n#{item.title}\n#{item.desc}\n\n" if item.link?) for item in items
-							telegram.sendMessage msg.chat.id, opt
+				googleFor sth, msg, 0, telegram, store, server
+
 		,
 			cmd: 'calc'
 			args: '<expression>'
@@ -39,3 +32,49 @@ exports.setup = (telegram, store) ->
 				telegram.sendMessage msg.chat.id, res, msg.message_id if res != ''
 
 	]
+
+googleFor = (query, msg, start, telegram, store, server) ->
+	{google} = require './google'
+	pkg = require '../package.json'
+	google query, (items, next) =>
+		if !items or items.lenth == 0
+			server.releaseInput msg.chat.id, msg.from.id
+		else
+			opt = ''
+			(opt += "#{item.link}\n#{item.title}\n#{item.desc}\n\n" if item.link?) for item in items
+			opt += "More results available. Send me 'Next' to see more." if next
+			telegram.sendMessage msg.chat.id, opt
+			if next
+				server.grabInput msg.chat.id, msg.from.id, pkg.name, 'google'
+				store.put 'google', "#{msg.chat.id}next#{msg.from.id}", next, (err) =>
+					if err?
+						server.releaseInput msg.chat.id, msg.from.id
+						telegram.sendMessage msg.chat.id, 'Ooooops, something\'s wrong', start
+					else
+						store.put 'google', "#{msg.chat.id}query#{msg.from.id}", query, (err) =>
+							if err?
+								server.releaseInput msg.chat.id, msg.from.id
+								telegram.sendMessage msg.chat.id, 'Where is the memory?? #$@#^$%$$'
+			else
+				server.releaseInput msg.chat.id, msg.from.id
+				store.put 'google', "#{msg.chat.id}next#{msg.from.id}", 0
+				store.put 'google', "#{msg.chat.id}query#{msg.from.id}", ''
+	, start
+
+exports.input = (cmd, msg, telegram, store, server) ->
+	switch cmd
+		when 'google' then doGoogle msg, telegram, store, server if msg.text.toLowerCase() is 'next'
+		else server.releaseInput msg.chat.id, msg.from.id
+
+doGoogle = (msg, telegram, store, server) ->
+	console.log "Google!"
+	store.get 'google', "#{msg.chat.id}next#{msg.from.id}", (err, next) =>
+		if next <= 0
+			server.releaseInput msg.chat.id, msg.from.id
+		else
+			store.get 'google', "#{msg.chat.id}query#{msg.from.id}", (err, query) =>
+				if err? or !query? or query == ''
+					server.releaseInput msg.chat.id, msg.from.id
+					telegram.sendMessage msg.chat.id, 'Oops, I forgot what I should do'
+				else
+					googleFor query, msg, next, telegram, store, server

@@ -45,8 +45,7 @@ exports.google = (query, callback, start) ->
 			console.log links
 
 			if $(nextSel).last().text() == 'Next'
-				callback links, =>
-					google query, callback, start + numPerPage
+				callback links, start + numPerPage
 			else
 				callback links
 		else
