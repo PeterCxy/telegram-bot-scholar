@@ -35,6 +35,7 @@ exports.setup = (telegram, store, server, config) ->
 			cmd: 'translate'
 			num: 1
 			desc: 'Translate the message (which your request replies to) to <lang>'
+			typing: yes
 			act: (msg, lang) ->
 				if !msg.reply_to_message
 					telegram.sendMessage msg.chat.id, 'What to translate?'
