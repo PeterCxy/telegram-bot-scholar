@@ -42,7 +42,7 @@ exports.setup = (telegram, store, server, config) ->
 					{translate} = require './translate'
 					translate telegram, config.yandex_api,
 						msg.reply_to_message.text, lang, msg.chat.id,
-						msg.reply_to_message.id
+						msg.reply_to_message.message_id
 
 	]
 

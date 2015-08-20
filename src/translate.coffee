@@ -15,6 +15,8 @@ exports.translate = (telegram, apiKey, text, dest, chat, replyTo) ->
 		[err, _, body] = yield request.post opts, ko.raw()
 
 		if !err?
+			console.log body
+
 			result = JSON.parse body
 			if result.code is 200 and result.text? and result.text.length > 0
 				telegram.sendMessage chat, result.text[0], replyTo
