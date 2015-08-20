@@ -1,7 +1,7 @@
 exports.name = "scholar"
 exports.desc = "A scholar bot!"
 
-exports.setup = (telegram, store, server) ->
+exports.setup = (telegram, store, server, config) ->
 	mathjs = require 'mathjs'
 
 	[
@@ -31,6 +31,18 @@ exports.setup = (telegram, store, server) ->
 					t = parser.eval line
 					res += t + '\n' if t != ''
 				telegram.sendMessage msg.chat.id, res, msg.message_id if res != ''
+		,
+			cmd: 'translate'
+			num: 1
+			desc: 'Translate the message (which your request replies to) to <lang>'
+			act: (msg, lang) ->
+				if !msg.reply_to_message
+					telegram.sendMessage msg.chat.id, 'What to translate?'
+				else
+					{translate} = require './translate'
+					translate telegram, config.yandex_api,
+						msg.reply_to_message.text, lang, msg.chat.id,
+						msg.reply_to_message.id
 
 	]
 
